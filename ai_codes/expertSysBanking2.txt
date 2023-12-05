@@ -1,0 +1,59 @@
+from pyknow import *
+
+class Customer(Fact):
+    pass
+
+class BankingExpert(KnowledgeEngine):
+    @Rule(Customer(age=P, age < 18))
+    def underage_customer(self):
+        self.declare(Customer(advice='Sorry, we cannot open an account for underage customers.'))
+
+    @Rule(Customer(income=P, income < 50000))
+    def low_income_customer(self):
+        self.declare(Customer(advice='Consider a basic savings account due to your low income.'))
+
+    @Rule(Customer(income=P, income >= 50000, income < 100000))
+    def moderate_income_customer(self):
+        self.declare(Customer(advice='Explore various account options suitable for your income level.'))
+
+    @Rule(Customer(income=P, income >= 100000))
+    def high_income_customer(self):
+        self.declare(Customer(advice='You may be eligible for premium banking services.'))
+
+    @Rule(AND(Customer(income=P, income >= 50000),
+              Customer(credit_score=P, credit_score < 600)))
+    def low_credit_score(self):
+        self.declare(Customer(advice='Due to your low credit score, consider a basic account.'))
+
+    @Rule(AND(Customer(income=P, income >= 50000),
+              Customer(credit_score=P, credit_score >= 600)))
+    def good_credit_score(self):
+        self.declare(Customer(advice='With your good credit score, explore various account options.'))
+
+# Function to take user input for creating a customer profile
+def get_customer_input():
+    name = input("Enter your name: ")
+    age = int(input("Enter your age: "))
+    income = float(input("Enter your monthly income: "))
+    credit_score = int(input("Enter your credit score: "))
+    address = input("Enter your address: ")
+    account_type = input("Enter your preferred account type (e.g., savings, checking): ")
+    
+    return Customer(name=name, age=age, income=income, credit_score=credit_score, address=address, account_type=account_type)
+
+# Example usage
+if __name__ == "__main__":
+    # Get customer input
+    customer_profile = get_customer_input()
+
+    # Create an instance of the banking expert system
+    banking_expert_system = BankingExpert()
+
+    # Run the expert system
+    banking_expert_system.reset()
+    banking_expert_system.declare(customer_profile)
+    banking_expert_system.run()
+
+    # Display advice
+    print(f"\nAdvice for {customer_profile.name}:")
+    print(customer_profile.advice)
