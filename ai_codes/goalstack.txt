@@ -1,0 +1,75 @@
+class Action:
+    def __init__(self, name, preconditions, effects):
+        self.name = name
+        self.preconditions = preconditions
+        self.effects = effects
+
+    def __str__(self):
+        return self.name
+
+class Goal:
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+class GoalStackPlanner:
+    def __init__(self):
+        self.goals = []
+        self.actions = []
+
+    def add_action(self, action):
+        self.actions.append(action)
+
+    def add_goal(self, goal):
+        self.goals.append(goal)
+
+    def pop_goal(self):
+        if self.goals:
+            return self.goals.pop()
+        else:
+            return None
+
+    def achieve_goal(self, goal):
+        if goal in self.goals:
+            return True
+        for action in self.actions:
+            if set(action.effects).intersection(set([goal])) and all(self.achieve_goal(precondition) for precondition in action.preconditions):
+                print(f"Achieving goal: {goal} with action: {action}")
+                return True
+        return False
+
+    def plan(self):
+        while self.goals:
+            current_goal = self.pop_goal()
+            if not self.achieve_goal(current_goal):
+                print(f"Failed to achieve goal: {current_goal}")
+                break
+
+# Example Usage:
+
+# Define actions
+action1 = Action("Action1", [], ["GoalA"])
+action2 = Action("Action2", ["GoalA"], ["GoalB"])
+action3 = Action("Action3", ["GoalB"], ["GoalC"])
+
+# Define goals
+goalC = Goal("GoalC")
+goalA = Goal("GoalA")
+goalB = Goal("GoalB")
+
+# Create a goal stack planner
+planner = GoalStackPlanner()
+
+# Add actions and goals to the planner
+planner.add_action(action1)
+planner.add_action(action2)
+planner.add_action(action3)
+
+planner.add_goal(goalC)
+planner.add_goal(goalA)
+planner.add_goal(goalB)
+
+# Execute the planner
+planner.plan()
